@@ -25,10 +25,12 @@ Prepare the application and trigger blue/green deployment to production
 Use the previous stack's output (source_repo_clone_url_http) and use git clone <url> to clone it to a location of your choice
 copy all contents of the cloud-bootstap-app directory into the empty repo directory, then cd into it
 In order for CodeDeploy to be able to create ECS tasks (during blue/green deployment), create your own ecs task definition from the prepared template by filling in your execution role's arn:
+
 # make sure to perform this step in your cloned application repo from step 1 & 2
 export TASK_EXEC_ROLE_ARN=<your-prod-exec-role-arn-from-terraform-output>
 envsubst < taskdef-prod.json.template > taskdef-prod.json
 rm taskdef-prod.json.template
+
 commit and push the changes
 check the ci/cd execution in the CodePipeline console, optionally have a look at the service events in the ECS console to observe the deployment process
 Test the DEV stage: Hit the load balancer's endpoint URL (see alb_address_dev stack output) - the service should be online (a good idea would be to hit the service's Swagger UI @ /swagger-ui.html).
