@@ -1,41 +1,47 @@
 # ECS-Deploy-different-env-dev-prod
 Deployment-Strategies in ECS In Multiple Environment
 
-Quick setup 
+Quick setup \
 In order to run this sample, you'll need:
 
-An AWS account
-The AWS CLI
-Terraform
-Git
+An AWS account \
+The AWS CLI \
+Terraform \
+AWS Code Suit
+
 The detailed setup steps for setting up the AWS CLI and Terraform can be found below. Assuming you have everything set up and ready to go, running this sample involves the following steps:
 
-Initial Setup for Remote State & Locking
-checkout this project
-cd into the terraform/remote-state directory, run terraform init
-run terraform apply
+Initial Setup for Remote State & Locking \
+checkout this project \
+cd into the terraform/remote-state directory, run terraform init \
+run terraform apply \
 You now have all initial resources to maintain the state of your Terraform stack within AWS (S3 & DynamoDB).
 
-Infrastructure setup
-cd into the terraform/infrastructure directory, run terraform init
-run terraform apply
+Infrastructure setup \
+cd into the terraform/infrastructure directory, run terraform init \
+run terraform apply \
 The infrastructure for maintaining, building, deploying, and running your application is now ready. Pay attention to the stack's output, mainly source_repo_clone_url_http and ecs_task_execution_role_arn_prod, you will need these in the next step.
 
 Prepare the application and trigger blue/green deployment to production
 Use the previous stack's output (source_repo_clone_url_http) and use git clone <url> to clone it to a location of your choice
+
 copy all contents of the cloud-bootstap-app directory into the empty repo directory, then cd into it
+
 In order for CodeDeploy to be able to create ECS tasks (during blue/green deployment), create your own ecs task definition from the prepared template by filling in your execution role's arn:
 
 # Make sure to perform this step in your cloned application repo from step 1 & 2
+
 export TASK_EXEC_ROLE_ARN=<your-prod-exec-role-arn-from-terraform-output> \
 envsubst < taskdef-prod.json.template > taskdef-prod.json \
-rm taskdef-prod.json.template
+rm taskdef-prod.json.template 
 
-commit and push the changes
-check the ci/cd execution in the CodePipeline console, optionally have a look at the service events in the ECS console to observe the deployment process
-Test the DEV stage: Hit the load balancer's endpoint URL (see alb_address_dev stack output) - the service should be online (a good idea would be to hit the service's Swagger UI @ /swagger-ui.html).
-Change the application's code on your machine (maybe add a mountain in MountainsController.kt?), commit and push
-Check the CodePipeline console again. upon successful deployment to DEV, there is a manual approval step that you'll need to confirm in order to trigger the PROD deployment
+commit and push the changes \
+check the ci/cd execution in the CodePipeline console, optionally have a look at the service events in the ECS console to observe the deployment process \
+Test the DEV stage: Hit the load balancer's endpoint URL (see alb_address_dev stack output) - the service should be online (a good idea would be to hit the service's Swagger UI @ /swagger-ui.html). 
+
+Change the application's code on your machine (maybe add a mountain in MountainsController.kt?), commit and push 
+
+Check the CodePipeline console again. upon successful deployment to DEV, there is a manual approval step that you'll need to confirm in order to trigger the PROD deployment \
 Upon approval, the blue/green deployment to PROD is triggered. Observe it in the CodeDeployment console and the ECS console. Deployment should take a few minutes.
 Verify that the changes have actually been deployment to production by curling the application's PROD endpoint (see alb_address_prod stack output)
 That's it.
