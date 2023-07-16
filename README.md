@@ -26,9 +26,9 @@ Use the previous stack's output (source_repo_clone_url_http) and use git clone <
 copy all contents of the cloud-bootstap-app directory into the empty repo directory, then cd into it
 In order for CodeDeploy to be able to create ECS tasks (during blue/green deployment), create your own ecs task definition from the prepared template by filling in your execution role's arn:
 
-# make sure to perform this step in your cloned application repo from step 1 & 2
-export TASK_EXEC_ROLE_ARN=<your-prod-exec-role-arn-from-terraform-output>
-envsubst < taskdef-prod.json.template > taskdef-prod.json
+# Make sure to perform this step in your cloned application repo from step 1 & 2
+export TASK_EXEC_ROLE_ARN=<your-prod-exec-role-arn-from-terraform-output> \
+envsubst < taskdef-prod.json.template > taskdef-prod.json \
 rm taskdef-prod.json.template
 
 commit and push the changes
@@ -42,19 +42,20 @@ That's it.
 
 Should you run into any errors along the way, please have a look at the initial setup steps below. Also, please don't forget to tear down everything when you're done to avoid unnecessary cost.
 
-Detailed Setup
+# Detailed Setup
+
 The following section dives deeper into the steps required to get started.
 
-Configuring the AWS CLI
+ Configuring the AWS CLI
 Configure the AWS CLI to match the desired region:
 
-aws configure
-AWS Access Key ID [None]: 
-AWS Secret Access Key [None]: 
-Default region name [None]: us-east-1
-Default output format [None]: 
-Adjust Terraform variables
-cd terraform/infrastructure
+aws configure \
+AWS Access Key ID [None]: \
+AWS Secret Access Key [None]: \
+Default region name [None]: us-east-1 \
+Default output format [None]: \
+Adjust Terraform variables \
+cd terraform/infrastructure \
 Edit terraform.tfvars, leave the aws_profile as "default", and set aws_region to match your needs.
 
 Terraform stack resources
@@ -63,28 +64,32 @@ The following resources will be created by terraform:
 S3 buckets for terraform state and build artifacts - view it in the S3 console.
 DynamoDB table for terraform state locking - view it in the DynamoDB console.
 ALB - view it in the EC2 console.
-ECS cluster - view it in the ECS console.
-ECR container registry - view it in the ECR console.
-CodeCommit git repo - view it in the CodeCommit console.
-CodeBuild project - view it in the CodeBuild console.
-CodePipeline build pipeline - view it in the CodePipeline console.
-CodeDeploy blue/green deployment - view it in the CodeDeploy console.
-Local Git setup
+
+ECS cluster - view it in the ECS console. \
+ECR container registry - view it in the ECR console. \
+CodeCommit git repo - view it in the CodeCommit console. \
+CodeBuild project - view it in the CodeBuild console.  \
+CodePipeline build pipeline - view it in the CodePipeline console. \
+CodeDeploy blue/green deployment - view it in the CodeDeploy console. \
+Local Git setup 
+
 In order to be able to interact with the CodeCommit repo created by this terraform stack, please make sure to setup your git installation appropriately. You will need to set the codecommit credential-helper for things to run smoothly.
 
-git config --global user.name "John Doe" # you might have set this up already
-git config --global user.email jdoe@thisismyemail.com # same here
-git config --global credential.helper '!aws codecommit credential-helper $@'
-git config --global credential.UseHttpPath true
+git config --global user.name "your_name" # you might have set this up already \
+git config --global user.email your_name@thisismyemail.com # same here \
+git config --global credential.helper '!aws codecommit credential-helper $@' \
+git config --global credential.UseHttpPath true  
+
 You should now be able to clone the CodeCommit Repo to a local directory of your choice. The repo URL can be found looking at the terraform outputs of the stack, see source_repo_clone_url_http or run terraform output source_repo_clone_url_http.
 
 macOS users: In case you encounter weird HTTP 403 errors when cloning, please look at any previously stored CodeCommit credentials in your Keychain Access app, and delete them.
 
-Testing the application
+# Testing the application
 From the output of the Terraform build, note the Terraform output alb_address_dev (dev stage) and alb_address_prod (prod stage), or run terraform output alb_address_<stage>. With it, you should be able to access the application:
 
-Perform a GET request against the <your-alb-address-here>/mountains resource
+Perform a GET request against the <your-alb-address-here>/mountains resource \
 Check out the Swagger UI by GETting the <your-alb-address-here>/swagger-ui.html resource
+
 Changing the application and retesting
 Testing the deployment process can best be tested by changing the application and observing how these end up in the respective stages. You can try this out by e.g. adding a mountain in the MountainsController class, and committing/pushing the change. This will trigger the following:
 
@@ -93,8 +98,24 @@ Automated blue/green deployment to production. This requires a manual approval s
 Cleanup
 In order to tear down the cluster, execute the following commands:
 
-cd terraform/infrastructure
-terraform destroy
-cd terraform/initial-setup/remote-state
-terraform destroy
+cd terraform/infrastructure \
+terraform destroy \
+cd terraform/initial-setup/remote-state \
+terraform destroy \
 The created S3 buckets might fail to delete if not empty. In this case, these need to be deleted manually. 
+
+
+
+## Authors
+
+- [@Vivek0892](https://www.github.com/Vivek0892)
+
+
+## Badges
+
+Add badges from somewhere like: [shields.io](https://shields.io/)
+
+[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
+[![GPLv3 License](https://img.shields.io/badge/License-GPL%20v3-yellow.svg)](https://opensource.org/licenses/)
+[![AGPL License](https://img.shields.io/badge/license-AGPL-blue.svg)](http://www.gnu.org/licenses/agpl-3.0)
+
